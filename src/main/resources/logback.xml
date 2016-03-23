@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+  <!-- Copyright (c) Secure Sky Technology Inc. All rights reserved. -->
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{ISO8601} [%thread] %level %logger #%marker# - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="ALL">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+</configuration>

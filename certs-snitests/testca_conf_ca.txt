@@ -1,0 +1,22 @@
+[ca]
+default_ca = testca
+
+[testca]
+dir              = .
+certificate      = ./testca.crt
+database         = ./index.txt
+private_key      = ./testca_rsa2048.pem
+serial           = ./serial.txt
+
+default_days = 3650
+default_md = sha256
+
+policy = testca_policy
+
+[testca_policy]
+countryName            = supplied
+stateOrProvinceName    = supplied
+organizationName       = supplied
+organizationalUnitName = optional
+commonName             = supplied
+emailAddress           = supplied

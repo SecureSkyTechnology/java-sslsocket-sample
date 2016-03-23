@@ -1,12 +1,40 @@
-*.class
+# ignore eclipse related file/dir.
+.project
+.classpath
+.settings
+bin
+
+# ignore netbeans related file/dir.
+nbproject
+
+# ignore windows system file/dir.
+Thumbs.db
+.DS_Store
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files #
+# ignore output file/dir.
+*.class
 *.jar
 *.war
 *.ear
+build
+target
+
+# ignore misc backups.
+*.swp
+*.bak
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# ignore generated certification related file/dir.
+**/certs
+**/*.crt
+**/*.pem
+**/*.csr
+**/*.cer
+**/*.der
+**/index.txt*
+**/serial.txt*

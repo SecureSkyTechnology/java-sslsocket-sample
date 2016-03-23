@@ -1,0 +1,4 @@
+# copied from jre/lib/security/java.security
+jdk.certpath.disabledAlgorithms=
+jdk.tls.disabledAlgorithms=
+jdk.tls.legacyAlgorithms=
