@@ -228,5 +228,76 @@ $ openssl ciphers -V -v "AES128-GCM-SHA256:AES256-GCM-SHA384"
 
 TLSv1.2 用のが混ざるが、 `SSLProtocol` の方でTLSv1.3だけに絞っているので問題ないと思われる。
 
+## Java11 から TLSv1.3 接続を確認
 
+1. `-p 8083:443` を付けて本コンテナを起動
+
+```
+$ pushd docker-httpd-tlsv1_3-only/
+$ docker build -t httpd-tlsv1_3 .
+$ docker run --rm -dit --name demo2 -p 8082:80 -p 8083:443 httpd-tlsv1_3
+$ popd
+```
+
+2. openjdk 11 でビルド
+
+```
+$ java -version
+openjdk version "11.0.12" 2021-07-20 LTS
+OpenJDK Runtime Environment 18.9 (build 11.0.12+7-LTS)
+OpenJDK 64-Bit Server VM 18.9 (build 11.0.12+7-LTS, mixed mode, sharing)
+
+$ ./mvnw package
+```
+
+3. `-protocols TLSv1.3` で TLSv1.3 に限定してGETアクセス
+
+```
+$ java -jar target/java-sslsocket-sample-1.0.jar -trustall -protocols TLSv1.3 https_get https://localhost:8083/
+2021-10-28 14:07:14,713 [main] INFO sst.sslsocket.sample.CliMain ## - SSLParameters from command line options: CliSSLParameters [protocols=[TLSv1.3], ciphers=[], cipherorder=false, servername=]
+SSLParameters (SSLSocket updated):
+  Protocols[0]: TLSv1.3
+  useCipherSuitesOrder: [false]
+  CipherSuites[0]: TLS_AES_128_GCM_SHA256
+  CipherSuites[1]: TLS_AES_256_GCM_SHA384
+(...)
+  CipherSuites[26]: TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+  endpointIdentificationAlgorithm: [null]
+  needClientAuth: [false]
+  wantClientAuth: [false]
+2021-10-28 14:07:15,198 [main] INFO sst.sslsocket.sample.app.HttpsGetClient ## - HTTPS GET Client connect to https://localhost:8083/
+-----------send>>
+GET / HTTP/1.1
+Host: localhost
+Connection: close
+
+
+-----------send<<
+-----------recv>>
+HTTP/1.1 200 OK
+Date: Thu, 28 Oct 2021 05:07:15 GMT
+Server: Apache/2.4.51 (Unix) OpenSSL/1.1.1k
+Last-Modified: Mon, 11 Jun 2007 18:53:14 GMT
+ETag: "2d-432a5e4a73a80"
+Accept-Ranges: bytes
+Content-Length: 45
+Connection: close
+Content-Type: text/html
+
+<html><body><h1>It works!</h1></body></html>
+-----------recv<<
+2021-10-28 14:07:15,572 [main] INFO sst.sslsocket.sample.app.HttpsGetClient ## - HTTPS GET Client disconnected
+```
+
+→ TLSv1.3 で接続できた。
+
+JavaのSSL/TLS実装の内部処理については、 `javax.net.debug` システムプロパティを指定するとデバッグprintが有効になる。
+
+- [JavaSE 11 -> セキュリティ開発者ガイド -> 8. Java Secure Socket Extension (JSSE)リファレンス・ガイド -> JSSEのトラブルシューティング -> デバッグ・ユーティリティ](https://docs.oracle.com/javase/jp/11/security/java-secure-socket-extension-jsse-reference-guide.html#GUID-31B7E142-B874-46E9-8DD0-4E18EC0EB2CF)
+
+```
+$ java -Djavax.net.debug=ssl:handshake -jar target/java-sslsocket-sample-1.0.jar -trustall -protocols TLSv1.3 https_get https://localhost:8083/
+```
+
+→ 実際の出力は省略するが、想定通り TLSv1.3 でハンドシェイクが進む様子を確認できた。
 
