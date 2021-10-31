@@ -24,6 +24,7 @@
 package sst.sslsocket.sample;
 
 import java.net.URL;
+import java.security.Security;
 
 import javax.net.ssl.KeyManager;
 
@@ -60,7 +61,7 @@ public class CliMain {
         options.addOption(Option
             .builder("protocols")
             .hasArg()
-            .argName("SSLv3,TLSv1,TLSv1.1,TLSv1.2")
+            .argName("SSLv3,TLSv1,TLSv1.1,TLSv1.2,TLSv1.3")
             .desc("passed to SSLParameters.setProtocols()")
             .build());
         options.addOption(Option
@@ -206,6 +207,43 @@ public class CliMain {
             }
             httpsGetClient.run(remainArgs[1], connectToHost, connectToPort, url.getPath(), hostHeader);
             break;
+        case "dump_props":
+            final String[] secProps = new String[] {
+                "securerandom.source",
+                "jdk.certpath.disabledAlgorithms",
+                "jdk.tls.disabledAlgorithms",
+                "jdk.tls.legacyAlgorithms",
+                "jdk.tls.server.defaultDHEParameters",
+                "jdk.tls.keyLimits",
+                "ocsp.enable",
+                "networkaddress.cache.ttl",
+                "networkaddress.cache.negative.ttl",
+            };
+            for (final String secp : secProps) {
+                System.out.println("Security Property[" + secp + "]=[" + Security.getProperty(secp) + "]");
+            }
+            final String[] sysProps = new String[] {
+                "jsse.enableSNIExtension",
+                "jsse.SSLEngine.acceptLargeFragments",
+                "jdk.tls.client.cipherSuites",
+                "jdk.tls.client.protocols",
+                "jdk.tls.server.cipherSuites",
+                "jdk.tls.server.protocols",
+                "jdk.tls.ephemeralDHKeySize",
+                "jdk.tls.namedGroups",
+                "jdk.tls.acknowledgeCloseNotify",
+                "jdk.tls.client.SignatureSchemes",
+                "jdk.tls.server.SignatureSchemes",
+                "jdk.tls.maxCertificateChainLength",
+                "jdk.tls.maxHandshakeMessageSize",
+                "jsse.enableMFLNExtension",
+                "jsse.enableFFDHE",
+                "com.sun.net.ssl.checkRevocation",
+            };
+            for (final String sysp : sysProps) {
+                System.out.println("System Property[" + sysp + "]=[" + System.getProperty(sysp) + "]");
+            }
+            break;
         default:
             logger.error("Unknown app:[{}]", app);
             usage();
@@ -228,12 +266,15 @@ public class CliMain {
         usageHeader.append("https_get <url>\n");
         usageHeader.append("    -> send HTTPS GET request to <url>, receive response, then print response.\n");
         usageHeader.append("\n");
+        usageHeader.append("dump_props <url>\n");
+        usageHeader.append("    -> dump major JSSE related java security, system properties.\n");
+        usageHeader.append("\n");
         usageHeader.append("SSL options (see javax.net.ssl.SSLParameters javadoc:\n");
         String usageFooter = "\nCopyright (c) Secure Sky Technology Inc. All rights reserved.\n\n";
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(1024);
         formatter.printHelp(
-            "java -jar java-sslsocket-sample-1.x.x.jar <app:echo_server|echo_client|https_get> <app args>",
+            "java -jar java-sslsocket-sample-1.x.x.jar <app:echo_server|echo_client|https_get|dump_props> <app args>",
             usageHeader.toString(),
             options,
             usageFooter,
