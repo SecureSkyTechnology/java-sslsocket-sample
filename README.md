@@ -43,4 +43,4 @@ Java8のSSLSocket/SSLServerSocketの使い方を紹介するサンプルJavaア�
   - `mvn -N io.takari:maven:0.7.7:wrapper` 適用
   - java 11 以上に対応
   - TLSv1.3 対応
-  - `dump_props` コマンド追加
+  - `dump_props`, `dump_ciphers` コマンド追加
