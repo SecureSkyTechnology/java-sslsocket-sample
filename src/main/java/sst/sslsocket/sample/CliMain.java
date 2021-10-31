@@ -25,8 +25,12 @@ package sst.sslsocket.sample;
 
 import java.net.URL;
 import java.security.Security;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.net.ssl.KeyManager;
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -244,6 +248,22 @@ public class CliMain {
                 System.out.println("System Property[" + sysp + "]=[" + System.getProperty(sysp) + "]");
             }
             break;
+        case "dump_ciphers":
+            for (final String protocol : clisp.protocols) {
+                final SSLContext sslContext = SSLContext.getInstance(protocol);
+                sslContext.init(null, null, null);
+                final List<String> defaultCipherSuites = Arrays.asList(sslContext.getDefaultSSLParameters().getCipherSuites());
+                Collections.sort(defaultCipherSuites);
+                for (final String cn : defaultCipherSuites) {
+                    System.out.println(protocol + ",default," + cn);
+                }
+                final List<String> supportedCipherSuites = Arrays.asList(sslContext.getSupportedSSLParameters().getCipherSuites());
+                Collections.sort(supportedCipherSuites);
+                for (final String cn : supportedCipherSuites) {
+                    System.out.println(protocol + ",supported," + cn);
+                }
+            }
+            break;
         default:
             logger.error("Unknown app:[{}]", app);
             usage();
@@ -266,15 +286,18 @@ public class CliMain {
         usageHeader.append("https_get <url>\n");
         usageHeader.append("    -> send HTTPS GET request to <url>, receive response, then print response.\n");
         usageHeader.append("\n");
-        usageHeader.append("dump_props <url>\n");
+        usageHeader.append("dump_props\n");
         usageHeader.append("    -> dump major JSSE related java security, system properties.\n");
+        usageHeader.append("\n");
+        usageHeader.append("dump_ciphers\n");
+        usageHeader.append("    -> dump default/supported ciphers for each SSL/TLS protocols given by '-protocols' options.\n");
         usageHeader.append("\n");
         usageHeader.append("SSL options (see javax.net.ssl.SSLParameters javadoc:\n");
         String usageFooter = "\nCopyright (c) Secure Sky Technology Inc. All rights reserved.\n\n";
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(1024);
         formatter.printHelp(
-            "java -jar java-sslsocket-sample-1.x.x.jar <app:echo_server|echo_client|https_get|dump_props> <app args>",
+            "java -jar java-sslsocket-sample-1.x.x.jar <app:echo_server|echo_client|https_get|dump_props|dump_ciphers> <app args>",
             usageHeader.toString(),
             options,
             usageFooter,
